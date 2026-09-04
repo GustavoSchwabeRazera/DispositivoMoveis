@@ -1,5 +1,6 @@
 package com.example.appgustavo;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -63,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
 
             int r = (random.nextInt( max-min))+min;
             textView.setText(Integer.toString(r));
+            Intent intent = new Intent(MainActivity.this,MainActivity2.class);
+
+            intent.putExtra("valor",r);
+            startActivity(intent);
         });
     }
 }
