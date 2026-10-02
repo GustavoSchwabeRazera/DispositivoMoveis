@@ -5,6 +5,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayAdapter <String> usb = new ArrayAdapter<>(getApplicationContext(),R.layout.item_lista,R.id.textView,nomes);
         listanomes.setAdapter(usb);
-
+        listanomes.setOnItemClickListener((parent, view, position, id) -> {
+            Toast.makeText(getApplicationContext(),nomes[position],Toast.LENGTH_LONG).show();
+        });
     }
 }
