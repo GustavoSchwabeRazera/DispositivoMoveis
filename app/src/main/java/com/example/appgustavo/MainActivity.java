@@ -1,5 +1,7 @@
 package com.example.appgustavo;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,80 +14,39 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainActivity extends AppCompatActivity {
+    SQLiteDatabase database;
 
-    private EditText editTitulo;
-    private EditText editTexto;
-    private Button btnSalvar;
-    private ListView listView;
-
-    private DatabaseHelper dbHelper;
-    private NotaAdapter adapter;
-    private List<Nota> listaNotas;
-
+    EditText edText;
+    Button button;
+    ListView listView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+        database=openOrCreateDatabase("notinhas", MODE_PRIVATE, null);
+        database.execSQL("CREATE TABLE IF NOT EXISTS notas(id INTEGER PRIMARY KEY AUTOINCREMENT, titulo VARCHAR, conteudo VARCHAR)");
+        edText=findViewById(R.layout.activity_main);
+        button=findViewById(R.layout.activity_main);
+        listView=findViewById(R.layout.activity_main);
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
-
-        editTitulo = findViewById(R.id.editTitulo);
-        editTexto = findViewById(R.id.editTexto);
-        btnSalvar = findViewById(R.id.Botao);
-        listView = findViewById(R.id.listView);
-
-        dbHelper = new DatabaseHelper(this);
-        listaNotas = new ArrayList<>();
-
-        adapter = new NotaAdapter(this, listaNotas);
-        listView.setAdapter(adapter);
-
-        carregarNotas();
-
-        btnSalvar.setOnClickListener(v -> {
-            String titulo = editTitulo.getText().toString().trim();
-            String texto = editTexto.getText().toString().trim();
-
-            if (titulo.isEmpty() && texto.isEmpty()) {
-                Toast.makeText(MainActivity.this, "Preencha os campos para salvar!", Toast.LENGTH_SHORT).show();
-                return;
+        button.setOnClickListener(view -> {
+            String titulo=edText.getText().toString();
+            ContentValues values=new ContentValues();
+            values.put("título", titulo);
+            int id = (int) database.insert("notinhas", null, values);
+            if(id > 0){
+                Toast.makeText(getApplicationContext(),
+                        "Nota salva com sucesso",
+                        Toast.LENGTH_SHORT).show();
             }
-
-            if (titulo.isEmpty()) {
-                titulo = "Nota sem título";
-            }
-
-            Nota nota = new Nota(titulo, texto);
-            long id = dbHelper.inserirNota(nota);
-
-            if (id != -1) {
-                Toast.makeText(MainActivity.this, "Nota salva com sucesso!", Toast.LENGTH_SHORT).show();
-                editTitulo.setText("");
-                editTexto.setText("");
-                carregarNotas();
-            } else {
-                Toast.makeText(MainActivity.this, "Erro ao salvar nota.", Toast.LENGTH_SHORT).show();
+            else{
+                Toast.makeText(getApplicationContext(),
+                        "Erro ao salvar nota",
+                        Toast.LENGTH_SHORT).show();
             }
         });
 
-        listView.setOnItemClickListener((parent, view, position, id) -> {
-            Nota notaSelecionada = listaNotas.get(position);
-            Toast.makeText(getApplicationContext(), "ID: " + notaSelecionada.getId() + "\nTítulo: " + notaSelecionada.getTitulo() + "\nTexto: " + notaSelecionada.getTexto(), Toast.LENGTH_LONG).show();
-        });
-    }
 
-    private void carregarNotas() {
-        listaNotas.clear();
-        listaNotas.addAll(dbHelper.listarNotas());
-        adapter.notifyDataSetChanged();
     }
 }
